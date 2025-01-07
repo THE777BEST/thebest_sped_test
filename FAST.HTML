@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internet Speed Meter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .result {
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    .btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>Internet Speed Meter</h1>
+  <button class="btn" onclick="startSpeedTest()">Start Test</button>
+
+  <div class="result">
+    <p>Download Speed: <span id="download">-</span></p>
+    <p>Upload Speed: <span id="upload">-</span></p>
+  </div>
+
+  <script>
+    function startSpeedTest() {
+      let startTime, endTime;
+      let downloadSpeed = 0;
+      let uploadSpeed = 0;
+
+      // Download Speed Test
+      const img = new Image();
+      startTime = Date.now();
+      img.src = `https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png?${Date.now()}`;
+
+      img.onload = function () {
+        endTime = Date.now();
+        const duration = (endTime - startTime) / 1000; // in seconds
+        const fileSize = 272 * 92 * 4; // Approximate size of image in bytes
+        downloadSpeed = (fileSize * 8) / duration / 1024 / 1024; // Convert to Mbps
+        document.getElementById('download').innerText = `${downloadSpeed.toFixed(2)} Mbps`;
+
+        // Start Upload Test
+        performUploadTest();
+      };
+
+      function performUploadTest() {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://localhost:3000/upload', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        const uploadData = new Array(1000000).join('a'); // 1MB of data
+        startTime = Date.now();
+        xhr.onload = function () {
+          endTime = Date.now();
+          const duration = (endTime - startTime) / 1000; // in seconds
+          const fileSize = uploadData.length; // Size of the data in bytes
+          uploadSpeed = (fileSize * 8) / duration / 1024 / 1024; // Convert to Mbps
+          document.getElementById('upload').innerText = `${uploadSpeed.toFixed(2)} Mbps`;
+        };
+        xhr.send(`data=${uploadData}`);
+      }
+    }
+  </script>
+</body>
+</html>
+
+<!-- BACKEND CODE (Node.js) -->
+
+// Save the following backend code in a file named server.js
+
+/*
+const express = require('express');
+const app = express();
+const port = 3000;
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.post('/upload', (req, res) => {
+  res.send("OK");
+});
+
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
+});
+*/
